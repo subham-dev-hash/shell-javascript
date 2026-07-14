@@ -13,9 +13,13 @@ rl.on("line", (command) => {
   if (command === 'exit') {
     rl.close();
     return;
+  } else if (command.startsWith("echo")) {
+    console.log(command.slice(5))
+    rl.prompt();
+  } else {
+    console.error(`${command}: command not found`);
+    rl.prompt();
   }
-  console.error(`${command}: command not found`);
-  rl.prompt();
 });
 
 // REPL -> Read Eval Print Loop
