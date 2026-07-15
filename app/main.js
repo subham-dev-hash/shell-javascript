@@ -52,19 +52,31 @@ function handleUnknown(command) {
 }
 
 function handleCommand(command) {
-  if (command === "exit") {
+  const parts = command.trim().split(/\s+/);
+  const cmd = parts[0];
+  if (cmd === "exit") {
     return handleExit();
   }
 
-  if (command.startsWith("echo")) {
+  if (cmd === "echo") {
     return handleEcho(command);
   }
 
-  if (command.startsWith("type")) {
+  if (cmd === "type") {
     return handleType(command);
   }
+  const args = parts.slice(1);
 
-  handleUnknown(command);
+  const executable = searchExecutable(cmd);
+
+  if (executable) {
+    spawnSync(executable, args, {
+      stdio: "inherit",
+    });
+    rl.prompt();
+  } else {
+    handleUnknown(command);
+  }
 }
 
 rl.prompt();
