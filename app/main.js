@@ -22,7 +22,7 @@ rl.on("line", (command) => {
     if(isBuiltin){
       console.log(`${command.slice(5)} is a shell builtin`)
     }else{
-      console.log(`type: ${command.slice(5)}: not found`)
+      console.log(`${command.slice(5)}: not found`)
     }
     rl.prompt()
   }
