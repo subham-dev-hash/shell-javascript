@@ -72,6 +72,7 @@ function handleCommand(command) {
   if (executable) {
     spawnSync(executable, args, {
       stdio: "inherit",
+       argv0: cmd,
     });
     rl.prompt();
   } else {
