@@ -1,4 +1,6 @@
 const readline = require("readline");
+const { spawnSync } = require('child_process')
+
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -6,38 +8,65 @@ const rl = readline.createInterface({
   prompt: "$ ",
 });
 
-// TODO: Uncomment the code below to pass the first stage
-rl.prompt();
-
-rl.on("line", (command) => {
-
-  if (command === 'exit') {
-    rl.close();
-    return;
-  } else if (command.startsWith("echo")) {
-    console.log(command.slice(5))
-    rl.prompt();
-  } else if (command.startsWith("type")) {
-    let isBuiltin = checkBuiltin(command.slice(5));
-    if(isBuiltin){
-      console.log(`${command.slice(5)} is a shell builtin`)
-    }else{
-      console.log(`${command.slice(5)}: not found`)
-    }
-    rl.prompt()
-  }
-  else {
-    console.error(`${command}: command not found`);
-    rl.prompt();
-  }
-});
+const builtins = ["type", "exit", "echo"];
 
 function checkBuiltin(str) {
-  const builtins = ["type", "exit", "echo"]
-  for (let el of builtins) {
-    if (el === str) return true
-  }
-  return false
+  return builtins.includes(str);
 }
 
-// REPL -> Read Eval Print Loop
+function handleExit() {
+  rl.close();
+}
+
+function handleEcho(command) {
+  console.log(command.slice(5));
+  rl.prompt();
+}
+
+function handleType(command) {
+  const cmd = command.slice(5);
+  let executable = searchExecutable(cmd)
+  let builtin = checkBuiltin(cmd)
+  if (executable || builtin) {
+    console.log(`${cmd} is ${builtin ? 'a shell builtin' : executable}`)
+  } else {
+    console.log(`${cmd}: not found`);
+  }
+  rl.prompt();
+}
+
+function searchExecutable(command) {
+
+  // Check if a file with the command name exists.
+  // Check if the file has execute permissions.
+  // If the file exists and has execute permissions, print <command> is <full_path> and stop.
+  // If the file exists but lacks execute permissions, skip it and continue to the next directory.
+
+  const res = spawnSync('which', [command])
+  if (res.status === 0) return res.stdout.toString().replace(/(\r\n|\n|\r)/gm, '')
+}
+
+function handleUnknown(command) {
+  console.error(`${command}: command not found`);
+  rl.prompt();
+}
+
+function handleCommand(command) {
+  if (command === "exit") {
+    return handleExit();
+  }
+
+  if (command.startsWith("echo")) {
+    return handleEcho(command);
+  }
+
+  if (command.startsWith("type")) {
+    return handleType(command);
+  }
+
+  handleUnknown(command);
+}
+
+rl.prompt();
+
+rl.on("line", handleCommand);
