@@ -1,5 +1,6 @@
 const readline = require("readline");
 const { spawnSync } = require('child_process')
+const fs = require('fs/promises')
 
 
 const rl = readline.createInterface({
@@ -8,7 +9,7 @@ const rl = readline.createInterface({
   prompt: "$ ",
 });
 
-const builtins = ["type", "exit", "echo", "pwd"];
+const builtins = ["type", "exit", "echo", "pwd", "cd"];
 
 function checkBuiltin(str) {
   return builtins.includes(str);
@@ -51,9 +52,23 @@ function handleUnknown(command) {
   rl.prompt();
 }
 
-function handlePwd(){
+function handlePwd() {
   console.log(process.cwd())
   rl.prompt();
+}
+
+function handleCd(command) {
+  // Handle only the absolute path for now -> /user/bin
+  // We have the path
+  // Check the path exists or not
+  // if exists than navigate to that
+  // else cd: <directory>: No such file or directory
+  const targetDir = command.slice(3);
+  try {
+    process.chdir(targetDir);
+  } catch (err) {
+    console.log(`cd: ${targetDir}: No such file or directory`);
+  }
 }
 
 function handleCommand(command) {
@@ -68,9 +83,11 @@ function handleCommand(command) {
   if (cmd === "echo") {
     return handleEcho(command);
   }
-
   if (cmd === "type") {
     return handleType(command);
+  }
+  if (cmd === "cd") {
+    return handleCd(command);
   }
   const args = parts.slice(1);
 
