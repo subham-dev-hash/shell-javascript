@@ -51,13 +51,20 @@ function handleUnknown(command) {
   rl.prompt();
 }
 
+function handlePwd(){
+  console.log(process.cwd())
+  rl.prompt();
+}
+
 function handleCommand(command) {
   const parts = command.trim().split(/\s+/);
   const cmd = parts[0];
   if (cmd === "exit") {
     return handleExit();
   }
-
+  if (cmd === "pwd") {
+    return handlePwd()
+  }
   if (cmd === "echo") {
     return handleEcho(command);
   }
@@ -72,7 +79,7 @@ function handleCommand(command) {
   if (executable) {
     spawnSync(executable, args, {
       stdio: "inherit",
-       argv0: cmd,
+      argv0: cmd,
     });
     rl.prompt();
   } else {
