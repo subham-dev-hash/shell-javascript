@@ -69,6 +69,7 @@ function handleCd(command) {
   } catch (err) {
     console.log(`cd: ${targetDir}: No such file or directory`);
   }
+   rl.prompt();
 }
 
 function handleCommand(command) {
