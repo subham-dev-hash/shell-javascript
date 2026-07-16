@@ -63,7 +63,7 @@ function handleCd(command) {
   // Check the path exists or not
   // if exists than navigate to that
   // else cd: <directory>: No such file or directory
-  const targetDir = command.slice(3);
+  let targetDir = command.slice(3);
   if (targetDir === '~') {
     targetDir = os.homedir();
   }
