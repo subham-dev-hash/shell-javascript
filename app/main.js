@@ -8,7 +8,7 @@ const rl = readline.createInterface({
   prompt: "$ ",
 });
 
-const builtins = ["type", "exit", "echo"];
+const builtins = ["type", "exit", "echo", "pwd"];
 
 function checkBuiltin(str) {
   return builtins.includes(str);
