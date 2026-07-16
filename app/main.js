@@ -1,7 +1,7 @@
 const readline = require("readline");
 const { spawnSync } = require('child_process')
 const fs = require('fs/promises')
-
+const os = require('os')
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -64,12 +64,15 @@ function handleCd(command) {
   // if exists than navigate to that
   // else cd: <directory>: No such file or directory
   const targetDir = command.slice(3);
+  if (targetDir === '~') {
+    targetDir = os.homedir();
+  }
   try {
     process.chdir(targetDir);
   } catch (err) {
     console.log(`cd: ${targetDir}: No such file or directory`);
   }
-   rl.prompt();
+  rl.prompt();
 }
 
 function handleCommand(command) {
