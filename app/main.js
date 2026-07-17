@@ -1,7 +1,8 @@
 const readline = require("readline");
 const { spawnSync } = require('child_process')
 const fs = require('fs/promises')
-const os = require('os')
+const os = require('os');
+const { parseCommand } = require("./quoting");
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -19,13 +20,14 @@ function handleExit() {
   rl.close();
 }
 
-function handleEcho(command) {
-  console.log(command.slice(5));
+function handleEcho(parts) {
+  const message = parts.slice(1).join(" ");
+  console.log(message);
   rl.prompt();
 }
 
-function handleType(command) {
-  const cmd = command.slice(5);
+function handleType(parts) {
+  const cmd = parts[1] || "";
   let executable = searchExecutable(cmd)
   let builtin = checkBuiltin(cmd)
   if (executable || builtin) {
@@ -57,13 +59,13 @@ function handlePwd() {
   rl.prompt();
 }
 
-function handleCd(command) {
+function handleCd(parts) {
   // Handle only the absolute path for now -> /user/bin
   // We have the path
   // Check the path exists or not
   // if exists than navigate to that
   // else cd: <directory>: No such file or directory
-  let targetDir = command.slice(3);
+  let targetDir = parts[1] || "";
   if (targetDir === '~') {
     targetDir = os.homedir();
   }
@@ -76,8 +78,14 @@ function handleCd(command) {
 }
 
 function handleCommand(command) {
-  const parts = command.trim().split(/\s+/);
+  const parts = parseCommand(command);
   const cmd = parts[0];
+
+  if (!cmd) {
+    rl.prompt();
+    return;
+  }
+
   if (cmd === "exit") {
     return handleExit();
   }
@@ -85,13 +93,13 @@ function handleCommand(command) {
     return handlePwd()
   }
   if (cmd === "echo") {
-    return handleEcho(command);
+    return handleEcho(parts);
   }
   if (cmd === "type") {
-    return handleType(command);
+    return handleType(parts);
   }
   if (cmd === "cd") {
-    return handleCd(command);
+    return handleCd(parts);
   }
   const args = parts.slice(1);
 
@@ -104,7 +112,7 @@ function handleCommand(command) {
     });
     rl.prompt();
   } else {
-    handleUnknown(command);
+    handleUnknown(cmd);
   }
 }
 
